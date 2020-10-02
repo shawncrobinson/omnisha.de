@@ -31,7 +31,7 @@ export class CdkStack extends Cdk.Stack {
             commands: ['cd cdk', 'npm install']
           },
           build: {
-            commands: ['cdk deploy']
+            commands: ['npm run cdk deploy']
           }
         }
       }), 
