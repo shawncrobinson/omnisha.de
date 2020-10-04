@@ -1,2 +1,2 @@
 # omnisha.de
-Backbone for my website using AWS and Typescript.
+My personal website https://omnisha.de/
