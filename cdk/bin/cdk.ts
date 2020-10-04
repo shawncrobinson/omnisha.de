@@ -20,4 +20,4 @@ async function describeSecret(secretId: string): Promise<SecretsManager.Describe
 
   const app = new cdk.App();
   new CdkStack(app, 'CdkStack', {secretArn: githubSecret.ARN as string});
-})()
+})();

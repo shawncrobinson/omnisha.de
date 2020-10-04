@@ -6,7 +6,7 @@ import * as SecretsManager from '@aws-cdk/aws-secretsmanager';
 import * as Cdk from '@aws-cdk/core';
 
 interface CdkStackProps extends Cdk.StackProps {
- secretArn: string;
+  secretArn: string;
 }
 
 export class CdkStack extends Cdk.Stack {
@@ -16,7 +16,7 @@ export class CdkStack extends Cdk.Stack {
     super(scope, id, props);
     this.props = props;
 
-    new CodePipeline.Pipeline(this, 'omnishadePipeline', {
+    new CodePipeline.Pipeline(this, 'omnisha.dePipeline', {
       restartExecutionOnUpdate: true,
       stages: this.renderPipelineStages()
     });
@@ -31,10 +31,14 @@ export class CdkStack extends Cdk.Stack {
             commands: ['cd cdk', 'npm install']
           },
           build: {
-            commands: ['npm run cdk deploy']
+            commands: [`npm run build ${this.stackName}`]
           }
+        },
+        artifacts: {
+          'base-directory': 'cdk/cdk.out',
+          files: [`${this.stackName}.template.json`]
         }
-      }), 
+      }),
       environment: {
         buildImage: CodeBuild.LinuxBuildImage.STANDARD_4_0
       }
@@ -44,8 +48,9 @@ export class CdkStack extends Cdk.Stack {
     secretPolicy.addActions('secretsmanager:DescribeSecret');
     secretPolicy.addResources(this.props.secretArn);
     project.addToRolePolicy(secretPolicy);
+
     return project;
-  }
+  };
 
   private renderPipelineStages = (): CodePipeline.StageProps[] => {
     const sourceOutput = new CodePipeline.Artifact();
@@ -61,7 +66,7 @@ export class CdkStack extends Cdk.Stack {
             actionName: 'GithubSource',
             oauthToken: sourceAuth,
             output: sourceOutput,
-            owner: 'Omnishade',
+            owner: 'omnishade',
             repo: 'omnisha.de',
             branch: 'master',
           })
@@ -71,10 +76,18 @@ export class CdkStack extends Cdk.Stack {
         stageName: 'SelfMutate',
         actions: [
           new CodePipelineActions.CodeBuildAction({
-            actionName: 'SelfMutate',
+            actionName: 'SelfMutateRender',
             input: sourceOutput,
             outputs: [selfMutateOutput],
-            project: this.renderSelfMutateProject()
+            project: this.renderSelfMutateProject(),
+            runOrder: 1
+          }),
+          new CodePipelineActions.CloudFormationCreateUpdateStackAction({
+            actionName: 'SelfMutateDeploy',
+            adminPermissions: true,
+            stackName: this.stackName,
+            templatePath: selfMutateOutput.atPath(`${this.stackName}.template.json`),
+            runOrder: 2
           })
         ]
       }
