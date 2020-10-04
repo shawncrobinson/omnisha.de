@@ -66,7 +66,7 @@ export class CdkStack extends Cdk.Stack {
             actionName: 'GithubSource',
             oauthToken: sourceAuth,
             output: sourceOutput,
-            owner: 'omnishade',
+            owner: 'Omnishade',
             repo: 'omnisha.de',
             branch: 'master',
           })
