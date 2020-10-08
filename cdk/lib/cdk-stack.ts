@@ -64,7 +64,7 @@ export class CdkStack extends Cdk.Stack {
 
     return [
       {
-        stageName: 'HelloWorld2',
+        stageName: 'GithubSource',
         actions: [
           new CodePipelineActions.GitHubSourceAction({
             actionName: 'GithubSource',
