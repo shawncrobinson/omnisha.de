@@ -111,7 +111,7 @@ export class CdkStack extends Cdk.Stack {
             actionName: 'SelfMutateDeploy',
             adminPermissions: true,
             stackName: this.stackName,
-            templatePath: selfMutateOutput.atPath(`${this.stackName}.template.json`),
+            templatePath: selfMutateOutput.atPath(`cdk.out/${this.stackName}.template.json`),
             runOrder: 2,
           }),
         ],
