@@ -127,9 +127,9 @@ export class CdkStack extends Cdk.Stack {
             actionName: 'DeployBackend',
             input: selfMutateOutput, 
             project: this.renderDeployBackend(),
-          })
-        ]
-      }
+          }),
+        ],
+      },
     ];
   };
 }
