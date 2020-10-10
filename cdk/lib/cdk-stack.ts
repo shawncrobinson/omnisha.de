@@ -32,7 +32,7 @@ export class CdkStack extends Cdk.Stack {
             commands: ['chmod +x cdk/bin/*'],
           },
           build: {
-            commands: [`./cdk/bin/build_code.sh ${this.stackName}`],
+            commands: [`./cdk/bin/build_code.sh`],
           },
         },
         artifacts: {
@@ -59,9 +59,9 @@ export class CdkStack extends Cdk.Stack {
         version: '0.2',
         phases: {
           build: {
-            commands: [`./bin/deploy_backend_sh ${this.props.backendStackName}`],
+            commands: [`./bin/deploy_backend.sh ${this.props.backendStackName}`],
           },
-        }
+        },
       }),
       environment: {
         buildImage: CodeBuild.LinuxBuildImage.STANDARD_4_0,
