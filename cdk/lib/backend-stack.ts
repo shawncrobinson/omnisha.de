@@ -1,7 +1,7 @@
 import * as ApiGateway from '@aws-cdk/aws-apigateway';
 import * as Dynamo from '@aws-cdk/aws-dynamodb';
-import * as Lambda from '@aws-cdk/aws-lambda';
 import * as Iam from '@aws-cdk/aws-iam';
+import * as Lambda from '@aws-cdk/aws-lambda';
 import * as Cdk from '@aws-cdk/core';
 import * as path from 'path';
 
@@ -10,7 +10,7 @@ export class BackendStack extends Cdk.Stack {
     private baseLayer: Lambda.LayerVersion;
     private dynamoTable: Dynamo.Table;
 
-    constructor(app: Cdk.App, id: string, props: Cdk.StackProps) {
+    constructor(app: Cdk.App, id: string, props?: Cdk.StackProps) {
         super(app, id, props);
 
         this.renderTable();
@@ -41,7 +41,7 @@ export class BackendStack extends Cdk.Stack {
         const root = this.api.root.addResource('blog');
         const list = root.addResource('list');
         this.renderListMethod(list);
-    }
+    };
 
     private createAssetCode = (): Lambda.Code => {
         this.baseLayer = new Lambda.LayerVersion(this, 'DependenciesLayer', {
@@ -58,11 +58,11 @@ export class BackendStack extends Cdk.Stack {
             layers: [this.baseLayer],
             memorySize: 256, 
             environment: {
-                TABLE_NAME: this.dynamoTable.tableName
-            }
+                TABLE_NAME: this.dynamoTable.tableName,
+            },
         });
         const listFunctionExecutionPolicy = new Iam.PolicyStatement({
-            actions: ['dyanmodb:Scan'],
+            actions: ['dynamodb:Scan'],
             effect: Iam.Effect.ALLOW,
             resources: [this.dynamoTable.tableArn],
         });
@@ -71,12 +71,12 @@ export class BackendStack extends Cdk.Stack {
             principal: new Iam.ServicePrincipal('apigateway.amazonaws.com'),
             action: 'lambda:InvokeFunction',
             sourceArn: this.api.arnForExecuteApi(),
-        })
+        });
 
         const integration = new ApiGateway.LambdaIntegration(listFunction, {
             allowTestInvoke: true,
             proxy: true,
-        })
+        });
         resource.addMethod('POST', integration);
     };
 }
