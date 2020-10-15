@@ -2,12 +2,15 @@ import * as CodeBuild from '@aws-cdk/aws-codebuild';
 import * as CodePipeline from '@aws-cdk/aws-codepipeline';
 import * as CodePipelineActions from '@aws-cdk/aws-codepipeline-actions';
 import * as Iam from '@aws-cdk/aws-iam';
+import * as S3 from '@aws-cdk/aws-s3';
 import * as SecretsManager from '@aws-cdk/aws-secretsmanager';
 import * as Cdk from '@aws-cdk/core';
 
 interface CdkStackProps extends Cdk.StackProps {
   secretArn: string;
   backendStackName: string;
+  frontendStackName: string;
+  frontendStaticAssetsBucket: S3.IBucket;
 }
 
 export class CdkStack extends Cdk.Stack {
@@ -21,7 +24,30 @@ export class CdkStack extends Cdk.Stack {
       restartExecutionOnUpdate: true,
       stages: this.renderPipelineStages(),
     });
-  }
+  };
+
+  private renderCompileFrontendProject = (): CodeBuild.PipelineProject => {
+    return new CodeBuild.PipelineProject(this, 'CompileFrontendProject', {
+      buildSpec: CodeBuild.BuildSpec.fromObject({
+        version: '0.2',
+        phases: {
+          install: {
+            commands: ['chmod +x cdk/bin/*'],
+          },
+          build: {
+            commands: ['./frontend/bin/compile_frontend.sh']
+          }
+        },
+        artifacts: {
+          'base-directory': 'frontend/build/',
+          files: ['**/*']
+        }
+      }),
+      environment: {
+        buildImage: CodeBuild.LinuxBuildImage.STANDARD_4_0,
+      }
+    })
+  };
 
   private renderSelfMutateProject = (): CodeBuild.PipelineProject => {
     const project = new CodeBuild.PipelineProject(this, 'SelfMutateProject', {
@@ -90,6 +116,7 @@ export class CdkStack extends Cdk.Stack {
       ).secretValueFromJson('OAuth');
 
     const selfMutateOutput = new CodePipeline.Artifact();
+    const staticAssetsOutput = new CodePipeline.Artifact();
 
     return [
       {
@@ -104,6 +131,17 @@ export class CdkStack extends Cdk.Stack {
             branch: 'master',
           }),
         ],
+      },
+      {
+        stageName: 'Compile',
+        actions: [
+          new CodePipelineActions.CodeBuildAction({
+            actionName: 'CompileFrontend',
+            input: sourceOutput,
+            outputs: [staticAssetsOutput],
+            project: this.renderCompileFrontendProject()
+          }),
+        ]
       },
       {
         stageName: 'SelfMutate',
@@ -135,6 +173,24 @@ export class CdkStack extends Cdk.Stack {
           }),
         ],
       },
+      {
+        stageName: 'DeployFrontend',
+        actions: [
+          new CodePipelineActions.CloudFormationCreateUpdateStackAction({
+            actionName: 'DeployFrontendStack',
+            adminPermissions: true,
+            stackName: this.props.frontendStackName,
+            templatePath: selfMutateOutput.atPath(`cdk.out/${this.props.frontendStackName}.template.json`),
+            runOrder: 1,
+          }),
+          new CodePipelineActions.S3DeployAction({
+            actionName: 'DeployFrontendAssets',
+            bucket: this.props.frontendStaticAssetsBucket,
+            input: staticAssetsOutput,
+            runOrder: 2,
+          })
+        ]
+      }
     ];
   };
 }
