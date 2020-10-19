@@ -13,6 +13,7 @@ interface FrontendStackProps extends Cdk.StackProps {
 
 export class FrontendStack extends Cdk.Stack {
     public staticAssetsBucket: S3.IBucket;
+
     constructor(app: Cdk.App, name: string, props: FrontendStackProps) {
         super(app, name, props);
 
@@ -22,7 +23,6 @@ export class FrontendStack extends Cdk.Stack {
         });
 
         const originAccessIdentity = new Cloudfront.OriginAccessIdentity(this, 'SiteOriginAccessIdentity');
-
         const siteBucket = new S3.Bucket(this, 'SiteBucket', {
             websiteIndexDocument: 'index.html',
         });

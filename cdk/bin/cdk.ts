@@ -26,7 +26,7 @@ async function listHostedZones(): Promise<Route53.ListHostedZonesResponse> {
 (async function () {
   const githubSecret = await describeSecret('GithubPersonalAccessToken');
   const hostedZones = await listHostedZones();
-  const filtered = hostedZones.HostedZones.filter(zone => zone.Name.includes('omnisha'));
+  const filtered = hostedZones.HostedZones.filter((zone) => zone.Name.includes('omnisha'));
   if (filtered.length !== 1) {
     throw 'No hosted zone found';
   }

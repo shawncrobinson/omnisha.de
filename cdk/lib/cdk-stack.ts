@@ -32,7 +32,7 @@ export class CdkStack extends Cdk.Stack {
         version: '0.2',
         phases: {
           install: {
-            commands: ['chmod +x cdk/bin/*'],
+            commands: ['chmod +x frontend/bin/*'],
           },
           build: {
             commands: ['./frontend/bin/compile_frontend.sh']
