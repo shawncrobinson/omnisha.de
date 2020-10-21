@@ -38,7 +38,7 @@ async function listHostedZones(): Promise<Route53.ListHostedZonesResponse> {
     domainName: 'omnisha.de',
   });
 
-  const backendStack = new BackendStack(app, 'OmnishadeBackendStack', {});
+  const backendStack = new BackendStack(app, 'OmnishadeBackendStack');
   
   new CdkStack(app, 'CdkStack', {
     secretArn: githubSecret.ARN as string,

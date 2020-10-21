@@ -17,7 +17,7 @@ export class FrontendStack extends Cdk.Stack {
     constructor(app: Cdk.App, name: string, props: FrontendStackProps) {
         super(app, name, props);
 
-        const hostedZone =  Route53.HostedZone.fromHostedZoneAttributes(this, 'SiteHostedZone', {
+        const hostedZone = Route53.HostedZone.fromHostedZoneAttributes(this, 'SiteHostedZone', {
             hostedZoneId: props.hostedZoneId,
             zoneName: props.hostedZoneName,
         });
@@ -46,9 +46,9 @@ export class FrontendStack extends Cdk.Stack {
                         {
                             isDefaultBehavior: true,
                             defaultTtl: Cdk.Duration.minutes(15), 
-                        }
-                    ]
-                }
+                        },
+                    ],
+                },
             ],
             viewerCertificate: Cloudfront.ViewerCertificate.fromAcmCertificate(certificate, {
                 aliases: [`www.${props.domainName}`, props.domainName],
