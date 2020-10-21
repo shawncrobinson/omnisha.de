@@ -40,7 +40,7 @@ export class FrontendStack extends Cdk.Stack {
                 {
                     s3OriginSource: {
                         s3BucketSource: siteBucket, 
-                        originAccessIdentity: undefined,
+                        originAccessIdentity: originAccessIdentity,
                     },
                     behaviors: [
                         {
@@ -61,7 +61,7 @@ export class FrontendStack extends Cdk.Stack {
             zone: hostedZone,
         });
 
-        const aoexRecord = new Route53.ARecord(this, 'SiteApexRecord', {
+        const apexRecord = new Route53.ARecord(this, 'SiteApexRecord', {
             target: Route53.RecordTarget.fromAlias(new Route53Targets.CloudFrontTarget(distribution)),
             zone: hostedZone,
             recordName: `www.${props.domainName}`,
