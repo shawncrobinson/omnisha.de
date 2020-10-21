@@ -5,4 +5,4 @@ set -xe
 pushd frontend
 
 npm install
-npm runbuild
+npm run build
